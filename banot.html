@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>קמפוס חמ"ד — כניסה לשיעורים · בנות</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #0d2a5c;
+    --blue: #1a56c4;
+    --blue-dark: #123e94;
+    --gold: #f5a623;
+    --bg-a: #eef6ff;
+    --bg-b: #fff9ec;
+    --card-bg: #ffffff;
+    --text: #1c2430;
+    --muted: #6b7280;
+    --border: #e6eaf2;
+    --disabled-bg: #eef0f4;
+    --disabled-text: #9aa1ae;
+    --radius: 18px;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    color: var(--text);
+    font-family: "Rubik", "Segoe UI", Arial, Helvetica, sans-serif;
+    direction: rtl;
+    background:
+      radial-gradient(circle at 8% 0%, #ffe9c2 0%, rgba(255,233,194,0) 45%),
+      radial-gradient(circle at 100% 10%, #cfe6ff 0%, rgba(207,230,255,0) 50%),
+      radial-gradient(circle at 20% 100%, #d7f7f0 0%, rgba(215,247,240,0) 45%),
+      var(--bg-a);
+    background-attachment: fixed;
+  }
+  .wrap { max-width: 1100px; margin: 0 auto; padding: 18px 14px 44px; }
+
+  header.top {
+    display: flex; align-items: center; gap: 16px;
+    flex-wrap: wrap;
+    background: linear-gradient(135deg, #ffffff 0%, #f3f8ff 100%);
+    border: 1px solid var(--border);
+    border-radius: 22px;
+    padding: 16px 20px;
+    margin-bottom: 18px;
+    box-shadow: 0 6px 20px rgba(13,42,92,0.08);
+  }
+  header.top .titles h1 {
+    margin: 0; font-size: 1.4rem; color: var(--navy); line-height: 1.3;
+    font-weight: 600;
+  }
+  header.top .titles p {
+    margin: 3px 0 0; color: var(--muted); font-size: 0.93rem;
+  }
+
+  .gender-pill {
+    display: inline-block; vertical-align: middle; margin-right: 8px;
+    background: linear-gradient(135deg, var(--blue), #3fa0e8);
+    color: #fff;
+    padding: 3px 14px; border-radius: 999px;
+    font-size: 0.8rem; font-weight: 500;
+    box-shadow: 0 2px 8px rgba(26,86,196,0.3);
+  }
+
+  .status-dot-btn {
+    position: fixed;
+    left: 14px; bottom: 14px;
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    border: none; padding: 0; cursor: default;
+    background: #2ecc71;
+    box-shadow: 0 0 0 4px rgba(46,204,113,0.2), 0 2px 6px rgba(13,42,92,0.18);
+    z-index: 100;
+  }
+  .status-dot-btn.err { background: #e74c3c; box-shadow: 0 0 0 4px rgba(231,76,60,0.2), 0 2px 6px rgba(13,42,92,0.18); }
+  .status-dot-btn.loading { background: #f5a623; box-shadow: 0 0 0 4px rgba(245,166,35,0.2), 0 2px 6px rgba(13,42,92,0.18); }
+
+  section.strand { margin-bottom: 34px; }
+  .strand-head {
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+    padding-bottom: 10px; margin-bottom: 18px;
+  }
+  .strand-head h2 {
+    margin: 0; font-size: 1.05rem; font-weight: 600;
+    color: #fff;
+    padding: 7px 18px; border-radius: 999px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+  }
+  .strand-head .time { color: var(--muted); font-size: 0.95rem; font-weight: 500; }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+    gap: 16px;
+  }
+  .card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-top: 5px solid var(--strand-color, var(--blue));
+    border-radius: var(--radius);
+    padding: 18px 18px 16px;
+    display: flex; flex-direction: column; gap: 10px;
+    box-shadow: 0 3px 10px rgba(13,42,92,0.07);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+  .card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 22px rgba(13,42,92,0.13);
+  }
+  .card .course-row { display: flex; align-items: center; gap: 10px; }
+  .card .icon-badge {
+    width: 44px; height: 44px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--strand-tint, #eef3ff);
+    border-radius: 13px;
+  }
+  .card .icon-badge svg { width: 27px; height: 27px; display: block; }
+  .card .course-name {
+    font-weight: 600; font-size: 1.04rem; color: var(--navy);
+    line-height: 1.25;
+  }
+  .card .teacher-name { color: var(--muted); font-size: 0.9rem; }
+  .card .btn-holder { display: flex; flex-direction: column; gap: 6px; }
+  .card a.enter-btn, .card span.enter-btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    gap: 7px;
+    margin-top: 4px;
+    text-decoration: none;
+    background: linear-gradient(135deg, var(--blue), #2f7fe0);
+    color: #fff;
+    font-weight: 500;
+    font-size: 0.95rem;
+    padding: 11px 14px;
+    border-radius: 999px;
+    transition: transform 0.12s ease, box-shadow 0.12s ease, filter 0.12s ease;
+    box-shadow: 0 4px 12px rgba(26,86,196,0.28);
+  }
+  .card a.enter-btn:hover { filter: brightness(1.07); transform: translateY(-1px); }
+  .card a.enter-btn:active { transform: scale(0.98); }
+  .card .enter-btn.disabled, .card span.enter-btn {
+    background: var(--disabled-bg);
+    color: var(--disabled-text);
+    cursor: not-allowed;
+    pointer-events: none;
+    box-shadow: none;
+  }
+
+  /* גיבוי לקישורים שלא נפתחים מתוך האתר (למשל Teams) */
+  .card .fallback {
+    display: none;
+    background: #fff6e5;
+    border: 1px solid #ffdfa0;
+    border-radius: 12px;
+    padding: 9px 11px;
+    font-size: 0.84rem;
+    color: var(--text);
+    line-height: 1.45;
+  }
+  .card .fallback.show { display: block; }
+  .card .fallback button {
+    margin-top: 6px;
+    font-family: inherit; font-size: 0.84rem; font-weight: 500;
+    background: #fff; color: var(--blue-dark);
+    border: 1px solid #c9d6f0; border-radius: 999px;
+    padding: 5px 12px; cursor: pointer;
+  }
+
+  footer.sig {
+    text-align: center; color: var(--muted);
+    font-size: 0.85rem; margin-top: 36px; padding-top: 18px;
+    border-top: 1px dashed var(--border);
+  }
+  footer.sig b { color: var(--navy); }
+
+  @media (max-width: 480px) {
+    header.top .titles h1 { font-size: 1.18rem; }
+    .grid { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 340px) {
+    .grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <div class="titles">
+      <h1>קמפוס חמ"ד — כניסה לשיעורי הלמידה <span class="gender-pill">בנות</span></h1>
+      <p>לוח הכניסה לשיעורים, לפי רצועה וקורס</p>
+    </div>
+  </header>
+
+  <button type="button" class="status-dot-btn loading" id="statusBar"
+    title="טוען קישורים עדכניים מהגיליון…" aria-label="סטטוס עדכון הקישורים מהגיליון"></button>
+
+  <main id="main"></main>
+
+  <footer class="sig">
+    <b>קמפוס חמ"ד מחוז חיפה</b> — למידה שפוגשת את התשוקה לדעת
+  </footer>
+
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  var SHEET_ID = "1X7rnozi1Lh1o8drj9vUBMmc73jFnJs4aWPFA04nE6EA";
+  var SHEET_GID = "0";          // מזהה הלשונית — לא משתנה גם אם משנים את שם הלשונית
+  var SHEET_TAB = "גיליון1";    // גיבוי בלבד, אם הקריאה לפי מזהה נכשלת
+  var REFRESH_MS = 3 * 60 * 1000;
+
+  /* קישורים שלא נפתחים מתוך מסגרת באתר — נפתחים בדף המלא */
+  var OPEN_IN_TOP = /teams\.microsoft\.com|teams\.live\.com/i;
+
+  var DATA = [
+    {
+      "label": "רצועה 1",
+      "time": "יום שלישי · 09:30–11:00",
+      "color": "#ff6b6b",
+      "tint": "#fff0f0",
+      "courses": [
+        {
+          "course": "אונטופ",
+          "teacher": "אפרת קלרמן",
+          "sheetKey": "אפרת קלרמן",
+          "icon": "<svg viewBox=\"0 0 48 48\"><rect x=\"12\" y=\"12\" width=\"24\" height=\"24\" rx=\"3\" fill=\"#74c0fc\" stroke=\"#1c2430\" stroke-width=\"2.5\" stroke-linejoin=\"round\"/><rect x=\"18\" y=\"18\" width=\"12\" height=\"12\" rx=\"1.5\" fill=\"#1c2430\"/><g stroke=\"#1c2430\" stroke-width=\"2.5\" stroke-linecap=\"round\"><line x1=\"18\" y1=\"6\" x2=\"18\" y2=\"12\"/><line x1=\"24\" y1=\"6\" x2=\"24\" y2=\"12\"/><line x1=\"30\" y1=\"6\" x2=\"30\" y2=\"12\"/><line x1=\"18\" y1=\"36\" x2=\"18\" y2=\"42\"/><line x1=\"24\" y1=\"36\" x2=\"24\" y2=\"42\"/><line x1=\"30\" y1=\"36\" x2=\"30\" y2=\"42\"/><line x1=\"6\" y1=\"18\" x2=\"12\" y2=\"18\"/><line x1=\"6\" y1=\"24\" x2=\"12\" y2=\"24\"/><line x1=\"6\" y1=\"30\" x2=\"12\" y2=\"30\"/><line x1=\"36\" y1=\"18\" x2=\"42\" y2=\"18\"/><line x1=\"36\" y1=\"24\" x2=\"42\" y2=\"24\"/><line x1=\"36\" y1=\"30\" x2=\"42\" y2=\"30\"/></g></svg>"
+        },
+        {
+          "course": "חיים בסרט — מבוא לקולנוע והפקת סרטונים",
+          "teacher": "אוריה יעקוביאן",
+          "sheetKey": "אוריה יעקוביאן",
+          "icon": "<svg viewBox=\"0 0 48 48\"><rect x=\"6\" y=\"18\" width=\"36\" height=\"24\" rx=\"3\" fill=\"#495057\" stroke=\"#1c2430\" stroke-width=\"2.5\" stroke-linejoin=\"round\"/><path d=\"M6 18l34-8 2 7-34 8z\" fill=\"#f8f9fa\" stroke=\"#1c2430\" stroke-width=\"2.5\" stroke-linejoin=\"round\"/><path d=\"M13 16.5l4 6M21 14.5l4 6M29 12.5l4 6\" stroke=\"#1c2430\" stroke-width=\"2.3\"/><polygon points=\"21,26 21,36 30,31\" fill=\"#ffd43b\" stroke=\"#1c2430\" stroke-width=\"2.5\" stroke-linejoin=\"round\"/></svg>"
+        }
+      ]
+    },
+    {
+      "label": "רצועה 2",
+      "time": "יום שלישי · 11:10–12:40",
+      "color": "#17b8a6",
+      "tint": "#e7fbf8",
+      "courses": [
+        {
+          "course": "צרפתית",
+          "teacher": "יעל זרביב",
+          "sheetKey": "יעל זרביב",
+          "icon": "<svg viewBox=\"0 0 48 48\"><path d=\"M24 4l3 14h-6z\" fill=\"#adb5bd\" stroke=\"#1c2430\" stroke-width=\"2.5\" stroke-linejoin=\"round\"/><path d=\"M21 18h6l3 10H18z\" fill=\"#868e96\" stroke=\"#1c2430\" stroke-width=\"2.5\" stroke-linejoin=\"round\"/><path d=\"M18 28h12l6 16h-7c0-5-2-8-5-8s-5 3-5 8h-7z\" fill=\"#495057\" stroke=\"#1c2430\" stroke-width=\"2.5\" stroke-linejoin=\"round\"/><line x1=\"16\" y1=\"28\" x2=\"32\" y2=\"28\" stroke=\"#1c2430\" stroke-width=\"3\" stroke-linecap=\"round\"/></svg>"
+        },
+        {
+          "course": "אקסליום",
+          "teacher": "יוכבד חניא",
+          "sheetKey": "יוכבד חניא",
+          "icon": "<svg viewBox=\"0 0 48 48\"><path d=\"M14 14h20c6 0 10 6 10 14 0 7-3 10-6 10-4 0-5-5-8-5H18c-3 0-4 5-8 5-3 0-6-3-6-10 0-8 4-14 10-14z\" fill=\"#9775fa\" stroke=\"#1c2430\" stroke-width=\"2.5\" stroke-linejoin=\"round\"/><path d=\"M14 21v8M10 25h8\" stroke=\"#fff\" stroke-width=\"2.6\" stroke-linecap=\"round\"/><circle cx=\"32\" cy=\"22\" r=\"2.2\" fill=\"#ffd43b\" stroke=\"#1c2430\" stroke-width=\"1.6\"/><circle cx=\"36\" cy=\"27\" r=\"2.2\" fill=\"#69db7c\" stroke=\"#1c2430\" stroke-width=\"1.6\"/></svg>"
+        },
+        {
+          "course": "חיים בסרט — מבוא לקולנוע והפקת סרטונים",
+          "teacher": "אוריה יעקוביאן",
+          "sheetKey": "אוריה יעקוביאן",
+          "icon": "<svg viewBox=\"0 0 48 48\"><rect x=\"6\" y=\"18\" width=\"36\" height=\"24\" rx=\"3\" fill=\"#495057\" stroke=\"#1c2430\" stroke-width=\"2.5\" stroke-linejoin=\"round\"/><path d=\"M6 18l34-8 2 7-34 8z\" fill=\"#f8f9fa\" stroke=\"#1c2430\" stroke-width=\"2.5\" stroke-linejoin=\"round\"/><path d=\"M13 16.5l4 6M21 14.5l4 6M29 12.5l4 6\" stroke=\"#1c2430\" stroke-width=\"2.3\"/><polygon points=\"21,26 21,36 30,31\" fill=\"#ffd43b\" stroke=\"#1c2430\" stroke-width=\"2.5\" stroke-linejoin=\"round\"/></svg>"
+        }
+      ]
+    },
+    {
+      "label": "רצועה 3",
+      "time": "יום שלישי · 14:00–15:30",
+      "color": "#f5a623",
+      "tint": "#fff6e5",
+      "courses": [
+        {
+          "course": "ספרדית",
+          "teacher": "סילבנה אפלבאום",
+          "sheetKey": "סילבנה אפלבאום",
+          "icon": "<svg viewBox=\"0 0 48 48\"><line x1=\"8\" y1=\"6\" x2=\"8\" y2=\"44\" stroke=\"#1c2430\" stroke-width=\"3\" stroke-linecap=\"round\"/><rect x=\"8\" y=\"8\" width=\"34\" height=\"24\" rx=\"2\" fill=\"#fff\" stroke=\"#1c2430\" stroke-width=\"2.5\" stroke-linejoin=\"round\"/><rect x=\"9.2\" y=\"9.2\" width=\"31.6\" height=\"6.8\" fill=\"#74c0fc\"/><rect x=\"9.2\" y=\"24\" width=\"31.6\" height=\"6.8\" fill=\"#74c0fc\"/><circle cx=\"25\" cy=\"20\" r=\"3\" fill=\"#ffd43b\" stroke=\"#e8a400\" stroke-width=\"1.4\"/><rect x=\"8\" y=\"8\" width=\"34\" height=\"24\" rx=\"2\" fill=\"none\" stroke=\"#1c2430\" stroke-width=\"2.5\" stroke-linejoin=\"round\"/></svg>"
+        },
+        {
+          "course": "אדריכלות",
+          "teacher": "גדי ליגטי",
+          "sheetKey": "גדי ליגטי",
+          "icon": "<svg viewBox=\"0 0 48 48\"><path d=\"M6 20L24 7l18 13z\" fill=\"#ff8787\" stroke=\"#1c2430\" stroke-width=\"2.5\" stroke-linejoin=\"round\"/><rect x=\"9\" y=\"20\" width=\"30\" height=\"20\" fill=\"#fff3bf\" stroke=\"#1c2430\" stroke-width=\"2.5\" stroke-linejoin=\"round\"/><rect x=\"14\" y=\"25\" width=\"6\" height=\"6\" fill=\"#74c0fc\" stroke=\"#1c2430\" stroke-width=\"2\"/><rect x=\"28\" y=\"25\" width=\"6\" height=\"6\" fill=\"#74c0fc\" stroke=\"#1c2430\" stroke-width=\"2\"/><rect x=\"21\" y=\"30\" width=\"6\" height=\"10\" fill=\"#a9744f\" stroke=\"#1c2430\" stroke-width=\"2\"/><line x1=\"4\" y1=\"40\" x2=\"44\" y2=\"40\" stroke=\"#1c2430\" stroke-width=\"2.5\" stroke-linecap=\"round\"/></svg>"
+        },
+        {
+          "course": "מטצ\"ים",
+          "teacher": "ענת רונן",
+          "sheetKey": "ענת רונן - אשוח",
+          "icon": "<svg viewBox=\"0 0 48 48\"><rect x=\"5\" y=\"9\" width=\"38\" height=\"30\" rx=\"3\" fill=\"#2b2d42\" stroke=\"#1c2430\" stroke-width=\"2.5\" stroke-linejoin=\"round\"/><circle cx=\"11\" cy=\"15\" r=\"1.6\" fill=\"#ff6b6b\"/><circle cx=\"16\" cy=\"15\" r=\"1.6\" fill=\"#ffd43b\"/><circle cx=\"21\" cy=\"15\" r=\"1.6\" fill=\"#69db7c\"/><path d=\"M11 24l6 5-6 5\" fill=\"none\" stroke=\"#69db7c\" stroke-width=\"2.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/><line x1=\"21\" y1=\"34\" x2=\"31\" y2=\"34\" stroke=\"#69db7c\" stroke-width=\"2.5\" stroke-linecap=\"round\"/></svg>"
+        },
+        {
+          "course": "אקסליום",
+          "teacher": "יוכבד חניא",
+          "sheetKey": "יוכבד חניא",
+          "icon": "<svg viewBox=\"0 0 48 48\"><path d=\"M14 14h20c6 0 10 6 10 14 0 7-3 10-6 10-4 0-5-5-8-5H18c-3 0-4 5-8 5-3 0-6-3-6-10 0-8 4-14 10-14z\" fill=\"#9775fa\" stroke=\"#1c2430\" stroke-width=\"2.5\" stroke-linejoin=\"round\"/><path d=\"M14 21v8M10 25h8\" stroke=\"#fff\" stroke-width=\"2.6\" stroke-linecap=\"round\"/><circle cx=\"32\" cy=\"22\" r=\"2.2\" fill=\"#ffd43b\" stroke=\"#1c2430\" stroke-width=\"1.6\"/><circle cx=\"36\" cy=\"27\" r=\"2.2\" fill=\"#69db7c\" stroke=\"#1c2430\" stroke-width=\"1.6\"/></svg>"
+        },
+        {
+          "course": "פיתוח אתרים עם בינה מלאכותית",
+          "teacher": "רחמים חניא",
+          "sheetKey": "רחמים חניא",
+          "icon": "<svg viewBox=\"0 0 48 48\"><rect x=\"6\" y=\"10\" width=\"36\" height=\"24\" rx=\"3\" fill=\"#1c2430\" stroke=\"#1c2430\" stroke-width=\"2.5\"/><rect x=\"9\" y=\"13\" width=\"30\" height=\"18\" rx=\"1.5\" fill=\"#9775fa\"/><path d=\"M4 36h40l-3 5H7z\" fill=\"#dcdde3\" stroke=\"#1c2430\" stroke-width=\"2.5\" stroke-linejoin=\"round\"/><path d=\"M17 19l-4 4 4 4\" fill=\"none\" stroke=\"#fff\" stroke-width=\"2.3\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/><path d=\"M31 19l4 4-4 4\" fill=\"none\" stroke=\"#fff\" stroke-width=\"2.3\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/><line x1=\"26\" y1=\"17\" x2=\"22\" y2=\"29\" stroke=\"#fff\" stroke-width=\"2.3\" stroke-linecap=\"round\"/></svg>"
+        }
+      ]
+    }
+  ];
+
+  var BTN_PLAY_SVG = "<svg viewBox=\"0 0 24 24\" width=\"18\" height=\"18\"><circle cx=\"12\" cy=\"12\" r=\"10\" fill=\"#ffffff\"/><polygon points=\"10,7.5 17,12 10,16.5\" fill=\"#1a56c4\"/></svg>";
+  var BTN_LOCK_SVG = "<svg viewBox=\"0 0 24 24\" width=\"15\" height=\"15\"><rect x=\"5\" y=\"11\" width=\"14\" height=\"9\" rx=\"2\" fill=\"none\" stroke=\"#9aa1ae\" stroke-width=\"2\"/><path d=\"M8 11V8a4 4 0 018 0v3\" fill=\"none\" stroke=\"#9aa1ae\" stroke-width=\"2\"/></svg>";
+
+  /* ---------- עזרים ---------- */
+
+  function normalizeKey(s) {
+    return (s || "").toString()
+      .replace(/["'׳״“”‘’]/g, "")
+      .replace(/[\-–—]/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+  }
+
+  /* מוציא כל קישור מתא (גם כמה קישורים בשורות נפרדות, עם תווית לפני הקישור) */
+  function urlsIn(cell) {
+    var out = [];
+    String(cell == null ? "" : cell).split(/\r?\n/).forEach(function (line) {
+      var m = line.match(/^(.*?)(https?:\/\/\S+)/);
+      if (!m) return;
+      out.push({ u: m[2].trim(), l: m[1].replace(/[:\-–\s]+$/, "").trim() });
+    });
+    return out;
+  }
+
+  function copyText(text, onDone) {
+    function legacy() {
+      try {
+        var ta = document.createElement("textarea");
+        ta.value = text;
+        ta.setAttribute("readonly", "");
+        ta.style.position = "fixed"; ta.style.opacity = "0";
+        document.body.appendChild(ta);
+        ta.select();
+        var ok = document.execCommand("copy");
+        document.body.removeChild(ta);
+        onDone(ok);
+      } catch (e) { onDone(false); }
+    }
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(function () { onDone(true); }, legacy);
+        return;
+      }
+    } catch (e) {}
+    legacy();
+  }
+
+  /* ---------- בניית הלוח ---------- */
+
+  function buildGrid() {
+    var main = document.getElementById("main");
+    main.innerHTML = "";
+    DATA.forEach(function (strand) {
+      var strandNum = (strand.label.match(/\d/) || [""])[0];
+
+      var section = document.createElement("section");
+      section.className = "strand";
+
+      var head = document.createElement("div");
+      head.className = "strand-head";
+      var h2 = document.createElement("h2");
+      h2.textContent = strand.label;
+      h2.style.background = strand.color;
+      var time = document.createElement("span");
+      time.className = "time";
+      var tp = strand.time.split(" · ");
+      time.textContent = tp[0] + (tp[1] ? " · " : "");
+      if (tp[1]) { var tt = document.createElement("span"); tt.dir = "ltr"; tt.textContent = tp[1]; time.appendChild(tt); }
+      head.appendChild(h2);
+      head.appendChild(time);
+      section.appendChild(head);
+
+      var grid = document.createElement("div");
+      grid.className = "grid";
+
+      strand.courses.forEach(function (c) {
+        var card = document.createElement("div");
+        card.className = "card";
+        card.style.setProperty("--strand-color", strand.color);
+        card.style.setProperty("--strand-tint", strand.tint);
+        card.setAttribute("data-key", normalizeKey(c.sheetKey));
+        card.setAttribute("data-strand", strandNum);
+
+        var courseRow = document.createElement("div");
+        courseRow.className = "course-row";
+        var iconBadge = document.createElement("div");
+        iconBadge.className = "icon-badge";
+        iconBadge.innerHTML = c.icon || "";
+        var courseName = document.createElement("div");
+        courseName.className = "course-name";
+        courseName.textContent = c.course;
+        courseRow.appendChild(iconBadge);
+        courseRow.appendChild(courseName);
+
+        var teacherName = document.createElement("div");
+        teacherName.className = "teacher-name";
+        teacherName.textContent = "עם " + c.teacher;
+
+        var btnHolder = document.createElement("div");
+        btnHolder.className = "btn-holder";
+        btnHolder.appendChild(renderButton(null, "", null));
+
+        card.appendChild(courseRow);
+        card.appendChild(teacherName);
+        card.appendChild(btnHolder);
+        grid.appendChild(card);
+      });
+
+      section.appendChild(grid);
+      main.appendChild(section);
+    });
+  }
+
+  /* ---------- כפתור כניסה ---------- */
+
+  function showFallback(holder, link) {
+    var box = holder.querySelector(".fallback");
+    if (!box) {
+      box = document.createElement("div");
+      box.className = "fallback";
+      holder.appendChild(box);
+    }
+    box.innerHTML = "";
+    var txt = document.createElement("div");
+    txt.textContent = "השיעור לא נפתח? העתיקו את הקישור והדביקו אותו בשורת הכתובת של הדפדפן.";
+    var btn = document.createElement("button");
+    btn.type = "button";
+    btn.textContent = "העתקת הקישור לשיעור";
+    btn.addEventListener("click", function () {
+      copyText(link, function (ok) {
+        btn.textContent = ok ? "הקישור הועתק ✓" : "לא הצלחנו להעתיק — לחצו לחיצה ארוכה על הכפתור הכחול";
+      });
+    });
+    box.appendChild(txt);
+    box.appendChild(btn);
+    box.classList.add("show");
+  }
+
+  function renderButton(link, label, holder) {
+    if (!link) {
+      var span = document.createElement("span");
+      span.className = "enter-btn disabled";
+      span.innerHTML = BTN_LOCK_SVG + "<span>קישור יתווסף</span>";
+      return span;
+    }
+    var a = document.createElement("a");
+    a.className = "enter-btn";
+    a.href = link;
+    a.innerHTML = BTN_PLAY_SVG + "<span></span>";
+    a.lastChild.textContent = label ? "כניסה לשיעור · " + label : "כניסה לשיעור";
+
+    var inFrame = false;
+    try { inFrame = window.self !== window.top; } catch (e) { inFrame = true; }
+    if (inFrame && OPEN_IN_TOP.test(link)) {
+      // Teams חוסם פתיחה מתוך מסגרת — פותחים בדף המלא של האתר
+      a.target = "_top";
+      a.addEventListener("click", function (ev) {
+        ev.preventDefault();
+        var moved = false;
+        try { window.top.location.href = link; moved = true; } catch (e1) {}
+        if (!moved) {
+          try { var w = window.open(link, "_blank"); moved = !!w; } catch (e2) {}
+        }
+        // אם אחרי שתי שניות עדיין לא עזבנו את הדף — מציגים דרך חלופית
+        setTimeout(function () {
+          if (document.visibilityState === "visible" && holder) showFallback(holder, link);
+        }, 2000);
+      });
+    } else {
+      a.target = "_blank";
+      a.rel = "noopener noreferrer";
+    }
+    return a;
+  }
+
+  /* ---------- בחירת הקישורים לכל כרטיס ---------- */
+
+  function pickLinks(e, strandNum, gender) {
+    if (e.temp.length) return e.temp;                       // קישור זמני גובר תמיד
+    var ex = e.extras.filter(function (x) {
+      return (!x.strand || x.strand === strandNum) && (!x.gender || x.gender === gender);
+    });
+    var spec = ex.filter(function (x) { return x.strand === strandNum; });
+    if (spec.length) return spec;                           // קישור ייעודי לרצועה
+    return e.main.concat(ex);                               // קישור כללי
+  }
+
+  function applyLinks(map) {
+    var pill = document.querySelector(".gender-pill");
+    var gender = pill ? pill.textContent.trim() : "";
+    var cards = document.querySelectorAll(".card");
+    Array.prototype.forEach.call(cards, function (card) {
+      var key = card.getAttribute("data-key");
+      var strandNum = card.getAttribute("data-strand") || "";
+      var e = map ? map[key] : null;
+      var list = e ? pickLinks(e, strandNum, gender) : [];
+      var holder = card.querySelector(".btn-holder");
+      holder.innerHTML = "";
+      if (!list.length) { holder.appendChild(renderButton(null, "", holder)); return; }
+      list.forEach(function (x, i) {
+        var lbl = list.length === 1 ? "" : (x.l || "קישור " + (i + 1));
+        holder.appendChild(renderButton(x.u, lbl, holder));
+      });
+    });
+  }
+
+  function setStatus(mode, text) {
+    var bar = document.getElementById("statusBar");
+    bar.className = "status-dot-btn" + (mode === "ok" ? "" : " " + mode);
+    bar.title = text;
+  }
+
+  /* ---------- קריאת הגיליון ---------- */
+
+  function parseTable(resp) {
+    var cols = resp.table.cols, rows = resp.table.rows;
+    var nameIdx = -1, linkIdx = -1, tempLinkIdx = -1, extraIdx = [];
+    cols.forEach(function (c, i) {
+      var lbl = ((c && c.label) || "").trim();
+      if (lbl.indexOf("שם המורה") > -1) nameIdx = i;
+      else if (lbl.indexOf("קישור זמני") > -1) tempLinkIdx = i;
+      else if (linkIdx === -1 && /קישור\s*(ל)?זום/.test(lbl) && !/רצועה\s*\d/.test(lbl.replace(/כללי/, ""))) linkIdx = i;
+      else if (/^קישור/.test(lbl)) {
+        var sm = lbl.match(/רצועה\s*(\d)/), gm = lbl.match(/בנים|בנות/);
+        var tail = lbl.replace(/^קישור\s*(ל?זום\s*)?/, "").replace(/רצועה\s*\d/, "").replace(/בנים|בנות/, "").trim();
+        extraIdx.push({ i: i, label: /^\d*$/.test(tail) ? "" : tail, strand: sm ? sm[1] : "", gender: gm ? gm[0] : "" });
+      }
+    });
+    if (nameIdx === -1 || linkIdx === -1) return null;
+
+    var map = {};
+    rows.forEach(function (r) {
+      var cells = r.c || [];
+      var name = cells[nameIdx] && cells[nameIdx].v;
+      if (!name) return;
+      var e = {
+        temp: tempLinkIdx > -1 && cells[tempLinkIdx] ? urlsIn(cells[tempLinkIdx].v) : [],
+        main: cells[linkIdx] ? urlsIn(cells[linkIdx].v) : [],
+        extras: []
+      };
+      extraIdx.forEach(function (x) {
+        if (cells[x.i]) urlsIn(cells[x.i].v).forEach(function (u) {
+          e.extras.push({ u: u.u, l: u.l || x.label, strand: x.strand, gender: x.gender });
+        });
+      });
+      if (e.temp.length || e.main.length || e.extras.length) map[normalizeKey(name)] = e;
+    });
+    return map;
+  }
+
+  var cbCounter = 0;
+  function gvizRequest(param, onDone) {
+    cbCounter += 1;
+    var cbName = "kampusGvizCb_" + Date.now() + "_" + cbCounter;
+    var finished = false;
+    var script = null;
+
+    var timeoutId = setTimeout(function () {
+      if (finished) return;
+      finished = true; cleanup();
+      onDone(null, "הגיליון לא הגיב בזמן");
+    }, 12000);
+
+    function cleanup() {
+      clearTimeout(timeoutId);
+      try { delete window[cbName]; } catch (e) { window[cbName] = undefined; }
+      if (script && script.parentNode) script.parentNode.removeChild(script);
+    }
+
+    window[cbName] = function (resp) {
+      if (finished) return;
+      finished = true; cleanup();
+      try {
+        if (!resp || resp.status === "error") { onDone(null, "הגיליון החזיר שגיאה"); return; }
+        var map = parseTable(resp);
+        if (!map) { onDone(null, "מבנה הגיליון השתנה — לא נמצאו העמודות הצפויות"); return; }
+        onDone(map, null);
+      } catch (err) {
+        onDone(null, "שגיאה בקריאת נתוני הגיליון");
+      }
+    };
+
+    script = document.createElement("script");
+    script.onerror = function () {
+      if (finished) return;
+      finished = true; cleanup();
+      onDone(null, "לא ניתן להתחבר לגיליון כרגע");
+    };
+    script.src = "https://docs.google.com/spreadsheets/d/" + SHEET_ID +
+      "/gviz/tq?tqx=out:json;responseHandler:" + cbName +
+      "&" + param + "&headers=1";
+    document.body.appendChild(script);
+  }
+
+  /* קודם לפי מזהה הלשונית (עמיד לשינוי שם), ואם נכשל — לפי השם */
+  function loadLinks(onDone) {
+    gvizRequest("gid=" + SHEET_GID, function (map, err) {
+      if (map) { onDone(map, null); return; }
+      gvizRequest("sheet=" + encodeURIComponent(SHEET_TAB), function (map2, err2) {
+        onDone(map2, map2 ? null : (err2 || err));
+      });
+    });
+  }
+
+  var lastGoodMap = null;
+  function refresh(isFirst) {
+    if (isFirst) setStatus("loading", "טוען קישורים עדכניים מהגיליון…");
+    loadLinks(function (map, err) {
+      if (map) {
+        lastGoodMap = map;
+        applyLinks(map);
+        var now = new Date();
+        var hh = ("0" + now.getHours()).slice(-2);
+        var mm = ("0" + now.getMinutes()).slice(-2);
+        setStatus("ok", "הקישורים מתעדכנים אוטומטית מהגיליון · עודכן לאחרונה " + hh + ":" + mm);
+      } else {
+        setStatus("err", "שגיאה בטעינת קישורים מהגיליון (" + err + "). מנסה שוב בקרוב — הכפתורים יישארו כפי שהיו.");
+        if (isFirst && !lastGoodMap) applyLinks(null);
+      }
+    });
+  }
+
+  buildGrid();
+  refresh(true);
+  setInterval(function () { refresh(false); }, REFRESH_MS);
+})();
+</script>
+
+</body>
+</html>
